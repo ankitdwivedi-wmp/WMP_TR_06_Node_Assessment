@@ -1,0 +1,16 @@
+const express= require('express');
+const routes= require('./routes/opr.route');
+require('dotenv').config();
+const bodyParser = require('body-parser')
+//Port Number
+const port=process.env.PORT||8000;
+
+const app=express();
+app.use(bodyParser.json());
+app.use('/',routes);
+
+//Server listening
+app.listen(port,()=>{
+    console.log('Server is started at port no:',port);
+})
+
