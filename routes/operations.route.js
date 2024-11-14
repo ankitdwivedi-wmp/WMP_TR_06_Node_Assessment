@@ -1,5 +1,5 @@
 const express= require('express');
-const { getData, addData, deleteData, updateData } = require('../controllers/opr.controllers');
+const { getData, addData, deleteData, updateData } = require('../controllers/oprations.controllers');
 const router= express.Router();
 
 router.get('/',getData);

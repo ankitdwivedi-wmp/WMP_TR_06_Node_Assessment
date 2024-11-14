@@ -1,5 +1,5 @@
 const express= require('express');
-const routes= require('./routes/opr.route');
+const routes= require('./routes/operations.route');
 require('dotenv').config();
 const bodyParser = require('body-parser')
 //Port Number
