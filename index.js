@@ -7,7 +7,7 @@ const port=process.env.PORT||8000;
 
 const app=express();
 app.use(bodyParser.json());
-app.use('/',routes);
+app.use('/api',routes);
 
 //Server listening
 app.listen(port,()=>{
