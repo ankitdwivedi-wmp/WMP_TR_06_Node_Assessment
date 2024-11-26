@@ -1,39 +1,40 @@
 const { writeData, readFile } = require('../utils/fileHandler');
 
-// Get all data
 /**
- * Fetches and returns all the data from the file data.json .
- * If there is an error while reading the data.json file, it sends a 500 response.
- * 
- * @param {*} req - The request object
- * @param {*} res - The response object
+ * Fetches all records from the `data.json` file and sends them as a JSON response.
+ * Handles errors during file read operations and responds with appropriate error messages.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
  */
 const getData = (req, res) => {
     try {
-        const data = readFile(); // Read data from the file
-        res.status(200).json(data); // Send the data as a JSON response
+        const data = readFile(); // Retrieve all data from the file
+        res.status(200).json(data); // Return the data as a JSON response
     } catch (error) {
         res.status(500).json({ message: 'Error in fetching data', error: error.message });
     }
 };
 
-// Add new data
 /**
- * Adds a new record with an id and comment to the data.json file.
- * If id or comment is missing in the request body, it sends a 400 response with the error massage.
- * 
- * @param {*} req - The request object (contains id and comment in the body)
- * @param {*} res - The response object
+ * Adds a new record to the `data.json` file. The request must include an `id` and a `comment` in the body.
+ * Validates the presence of required fields and appends the new data to the file.
+ * Handles file write errors and responds with appropriate messages.
+ *
+ * @param {Object} req - The request object (contains `id` and `comment` in the body).
+ * @param {Object} res - The response object.
  */
 const addData = (req, res) => {
     try {
-        if (!req.body.id || !req.body.comment) { // Check if id or comment is missing
+        const { id, comment } = req.body;
+
+        if (!id || !comment) {
             return res.status(400).json({ message: 'id and comment are required' });
         }
 
-        const data = readFile(); // Read existing data from the file
-        data.push({ id:req.body.id, comment:req.body.comment }); // Add new record to the data
-        writeData(data); // Write updated data back to the file
+        const data = readFile(); // Read the existing records
+        data.push({ id, comment }); // Add the new record
+        writeData(data); // Save the updated data to the file
 
         res.status(201).json({ message: 'Data added successfully' });
     } catch (error) {
@@ -41,25 +42,25 @@ const addData = (req, res) => {
     }
 };
 
-// Delete data by id
 /**
- * Deletes a record from the data.json file based on the id passed as a parameter.
- * If the record is not found, it sends a 404 response.
- * 
- * @param {*} req - The request object (contains id as a URL parameter)
- * @param {*} res - The response object
+ * Deletes a record from the `data.json` file by its `id`. The `id` is passed as a URL parameter.
+ * Validates the presence of the record before attempting to delete it.
+ * Handles errors during file read/write operations and responds with appropriate messages.
+ *
+ * @param {Object} req - The request object (contains `id` as a URL parameter).
+ * @param {Object} res - The response object.
  */
 const deleteData = (req, res) => {
     try {
+        const data = readFile(); // Retrieve all records
+        const dataIndex = data.findIndex(entry => entry.id === parseInt(req.params.id, 10)); // Locate the record by id
 
-        const data = readFile(); // Read data from the file
-        const dataIndex = data.findIndex(entry => entry.id === parseInt(req.params.id)); // Find the index of the record by id
-        if (dataIndex === -1) { // If no record is found, send a 404 response
+        if (dataIndex === -1) {
             return res.status(404).json({ message: 'Data not found' });
         }
 
-        data.splice(dataIndex, 1); // Remove the record from the data
-        writeData(data); // Write updated data back to the file
+        data.splice(dataIndex, 1); // Remove the record
+        writeData(data); // Save the updated records
 
         res.status(200).json({ message: 'Data deleted successfully' });
     } catch (error) {
@@ -67,36 +68,36 @@ const deleteData = (req, res) => {
     }
 };
 
-// Update data by id
 /**
- * Updates an existing record by id with a new comment.
- * If the id is invalid or the comment is missing/invalid, it sends a 400 response.
- * If the record is not found, it sends a 404 response.
- * 
- * @param {*} req - The request object (contains id and comment in the body)
- * @param {*} res - The response object
+ * Updates an existing record in the `data.json` file using its `id`. 
+ * The `id` and new `comment` are passed in the request body.
+ * Validates the format of `id` and `comment`, ensures the record exists, and updates it.
+ * Handles errors during file operations and responds with appropriate messages.
+ *
+ * @param {Object} req - The request object (contains `id` and `comment` in the body).
+ * @param {Object} res - The response object.
  */
 const updateData = (req, res) => {
     try {
-        // Validate id it should be a number
-        if (typeof (req.body.id )=== 'string' || isNaN(parseInt(req.body.id ))) {
+        const { id, comment } = req.body;
+
+        if (typeof id !== 'number' || isNaN(id)) {
             return res.status(400).json({ message: 'Invalid id. It should be a valid number.' });
         }
 
-        // Validate comment (it should be a non-empty string)
-        if (!req.body.comment || typeof req.body.comment !== 'string' || req.body.comment.trim() === '') {
+        if (!comment || typeof comment !== 'string' || comment.trim() === '') {
             return res.status(400).json({ message: 'Invalid comment. It must be a non-empty string.' });
         }
 
-        const data = readFile(); // Read data from the file
-        const dataIndex = data.findIndex(entry => entry.id === req.body.id); // Find the record by id
+        const data = readFile(); // Retrieve all records
+        const dataIndex = data.findIndex(entry => entry.id === id); // Locate the record by id
 
-        if (dataIndex === -1) { // If no record is found, send a 404 response
+        if (dataIndex === -1) {
             return res.status(404).json({ message: 'Data not found' });
         }
 
-        data[dataIndex] = { id:req.body.id, comment:req.body.comment }; // Update the record with new data
-        writeData(data); // Write updated data back to the file
+        data[dataIndex] = { id, comment }; // Update the record
+        writeData(data); // Save the updated records
 
         res.status(200).json({ message: 'Data updated successfully' });
     } catch (error) {
