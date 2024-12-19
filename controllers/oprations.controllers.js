@@ -1,65 +1,53 @@
-const { writeData, readFile } = require('../utils/fileHandler');
+const DbService = require('../services/dbService');
+const {Usercomment} = require('../models');
+
+// Create an instance of DbService with the Usercomment model
+const dbService = new DbService(Usercomment);
 
 /**
- * Fetches all comments from the data.json file and sends them as a JSON response.
- * Handles errors during file read operations and responds with error messages.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * Fetches all comments from the database and sends them as a JSON response.
  */
-const getData = (req, res) => {
+const getData = async (req, res) => {
     try {
-        const data = readFile(); // Retrieve all data from the file
-        res.status(200).json(data); // Return the data as a JSON response
+        const data = await dbService.readAll();
+        res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ message: 'Error in fetching data', error: error.message });
     }
 };
 
 /**
- * Adds a new comment to the data.json file. The request must include an id and a comment in the body.
- * Validates the presence of required fields and appends the new comment to the file.
- * Handles file write errors and responds with errors messages.
- *
- * @param {Object} req - The request object (contains id and comment in the body).
- * @param {Object} res - The response object.
+ * Adds a new comment to the database.
  */
-const addData = (req, res) => {
+const addData = async (req, res) => {
     try {
+        const { c_id, comment } = req.body;
 
-        if (!req.body.id || !req.body.comment) {
-            return res.status(400).json({ message: 'id and comment are required' });
+        if (!c_id || !comment) {
+            return res.status(400).json({ message: 'c_id and comment are required' });
         }
-
-        const data = readFile(); // Read the existing comments
-        data.push({ id:req.body.id, comment:req.body.comment }); // Add the new comment
-        writeData(data); // Save the updated data to the file
-
-        res.status(201).json({ message: 'Data added successfully' });
+        let isPresent = await dbService.read(c_id);
+        if (isPresent) {
+            return res.status(400).json({ message: `An entry with c_id ${c_id} already exists.` });
+        }
+        const newComment = await dbService.create({ c_id, comment });
+        res.status(201).json({ message: 'Data added successfully', data: newComment });
     } catch (error) {
         res.status(500).json({ message: 'Error while adding data', error: error.message });
     }
 };
 
 /**
- * Deletes a comment from the data.json file by its id. The id is passed as a URL parameter.
- * Validates the presence of the comment before attempting to delete it.
- * Handles errors during file read/write operations and responds with error messages.
- *
- * @param {Object} req - The request object (contains id as a URL parameter).
- * @param {Object} res - The response object.
+ * Deletes a comment from the database by its c_id.
  */
-const deleteData = (req, res) => {
+const deleteData = async (req, res) => {
     try {
-        const data = readFile(); // Retrieve all comments
-        const dataIndex = data.findIndex(entry => entry.id === parseInt(req.params.id, 10)); // Locate the comment by id
+        const { c_id } = req.params;
+        const result = await dbService.delete(c_id);
 
-        if (dataIndex === -1) {
+        if (!result) {
             return res.status(404).json({ message: 'Data not found' });
         }
-
-        data.splice(dataIndex, 1); // Remove the comment
-        writeData(data); // Save the updated comments
 
         res.status(200).json({ message: 'Data deleted successfully' });
     } catch (error) {
@@ -68,36 +56,27 @@ const deleteData = (req, res) => {
 };
 
 /**
- * Updates an existing comment in the data.json file using its id. 
- * The id and new comment are passed in the request body.
- * Validates the format of id and comment, ensures the comment exists, and updates it.
- * Handles errors during file operations and responds with appropriate messages.
- *
- * @param {Object} req - The request object (contains id and comment in the body).
- * @param {Object} res - The response object.
+ * Updates an existing comment in the database using its c_id.
  */
-const updateData = (req, res) => {
+const updateData = async (req, res) => {
     try {
+        const { c_id, comment } = req.body;
 
-        if (typeof req.body.id !== 'number' || isNaN(req.body.id)) {
-            return res.status(400).json({ message: 'Invalid id. It should be a valid number.' });
+        if (typeof c_id !== 'number' || isNaN(c_id)) {
+            return res.status(400).json({ message: 'Invalid c_id. It should be a valid number.' });
         }
 
-        if (!req.body.comment || typeof req.body.comment !== 'string' || req.body.comment.trim() === '') {
+        if (!comment || typeof comment !== 'string' || comment.trim() === '') {
             return res.status(400).json({ message: 'Invalid comment. It must be a non-empty string.' });
         }
 
-        const data = readFile(); // Retrieve all comments
-        const dataIndex = data.findIndex(entry => entry.id === req.body.id); // Locate the comment by id
+        const updatedComment = await dbService.update(c_id , comment );
 
-        if (dataIndex === -1) {
+        if (!updatedComment) {
             return res.status(404).json({ message: 'Data not found' });
         }
 
-        data[dataIndex] = { id:req.body.id, comment:req.body.comment }; // Update the comment
-        writeData(data); // Save the updated comments
-
-        res.status(200).json({ message: 'Data updated successfully' });
+        res.status(200).json({ message: 'Data updated successfully', data: updatedComment });
     } catch (error) {
         res.status(500).json({ message: 'Error updating data', error: error.message });
     }
