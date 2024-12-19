@@ -1,6 +1,6 @@
 # Node.js File Handling API
 
-This project is a Node.js-based backend application designed to manage file-based data. The API supports CRUD operations to manage data stored in a local JSON file. It also includes input validation and error handling for efficient data management.
+This project is a Node.js-based backend application designed to manage file-based data. The API supports CRUD operations to manage data stored in a postgres database. It includes input validation and error handling for efficient data management as well as api endpoints testing with swagger.
 
 ---
 
@@ -11,6 +11,7 @@ This project is a Node.js-based backend application designed to manage file-base
 - **Update Data**: Modify existing entries by ID.
 - **Delete Data**: Remove entries by ID.
 - **Validation**: Ensure data integrity with middleware for request validation.
+- **Testing**: Testing with Swagger for API endpoints.
 
 ---
 
@@ -20,6 +21,7 @@ Ensure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (v14+ recommended)
 - [npm](https://www.npmjs.com/)
+- [postgreSQL](https://www.postgresql.org/download/)
 
 ---
 
@@ -34,15 +36,14 @@ cd WMP_TR_06_Node_Assessment
 
 npm install
 
-### 3.Create a data file:
-
-Place a data.json file in the data directory.
-Initialize it with an empty array
-
-### 4.Create .env file
+### 3.Create .env file
 Define PORT variable
+username= username for database
+password = Password for the user of database
+database = Name of the database
+db_host = localhost
 
-### 5.Start the server:
+### 4.Start the server:
 
 npm start
 The application will run on defined port as in .env otherwise on http://localhost:8000 by default.
@@ -54,8 +55,8 @@ Fetches all data from the JSON file.
 Response:
 json
 [
-  { "id": 1, "comment": "This is a sample comment" },
-  { "id": 2, "comment": "Another comment" }
+  { "c_id": 1, "comment": "This is a sample comment" },
+  { "c_id": 2, "comment": "Another comment" }
 ]
 ### 2.POST /comments/add
 Adds a new data entry in the JSON file.
@@ -63,7 +64,7 @@ Adds a new data entry in the JSON file.
 Request Body:
 json
 
-{ "id": 3, "comment": "New comment" }
+{ "c_id": 3, "comment": "New comment" }
 Response:
 json
 
@@ -74,18 +75,22 @@ Updates an existing entry by ID.
 Request Body:
 json
 
-{ "id": 3, "comment": "Updated comment" }
+{ "c_id": 3, "comment": "Updated comment" }
 Response:
 json
 
 { "message": "Data updated successfully" }
-### 4.DELETE /comments/delete/:id
+### 4.DELETE /comments/delete/:c_id
 Deletes an entry by its ID.
 
 Response:
 json
 
 { "message": "Data deleted successfully" }
+### 5.Swagger-docs /api-docs
+UI for the Swagger
+
+
 
 ### Contributing
 ### 1.Fork the repository.
