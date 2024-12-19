@@ -30,6 +30,7 @@ Ensure you have the following installed:
 ### 1. Clone the repository:
 
 git clone https://github.com/ankitdwivedi-wmp/WMP_TR_06_Node_Assessment.git
+
 cd WMP_TR_06_Node_Assessment
 
 ### 2. Install dependencies:
@@ -38,9 +39,13 @@ npm install
 
 ### 3.Create .env file
 Define PORT variable
+
 username= username for database
+
 password = Password for the user of database
+
 database = Name of the database
+
 db_host = localhost
 
 ### 4.Start the server:
